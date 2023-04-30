@@ -103,7 +103,7 @@ def get_center_angle(
     # center_coord is the middle point between left_coord and right_coord
     center_coord = (left_coord + right_coord) / 2
     # angle is the angle between the line connecting left_coord and right_coord and the x-axis, use np.arctan2
-    angle = np.arctan2(right_coord[1] - left_coord[1], right_coord[0] - left_coord[0]) * 180 / np.pi
+    angle = np.arctan2(right_coord[1] - left_coord[1], right_coord[0] - left_coord[0]) * 180
 
     return center_coord, angle
 
