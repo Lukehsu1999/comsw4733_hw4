@@ -1,0 +1,8 @@
+numpy
+opencv-python
+torch
+torchvision
+scipy
+pandas
+scikit-image
+imgaug
