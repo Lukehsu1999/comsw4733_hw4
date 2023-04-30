@@ -1,0 +1,4 @@
+*.zip
+/data
+/assets
+/venv2_hw4
