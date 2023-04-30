@@ -222,14 +222,14 @@ class AffordanceModel(nn.Module):
         # find rotation angle and location in original image
         best_img_rotate_angle = 22.5 * idx_rotated
         # OpenCV clockwise convention 
-        angle = -1*best_img_rotate_angle
+        angle = -1*best_img_rotate_angle + 360
         best_img_center = KeypointsOnImage([Keypoint(x=idx_loc % 128, y=idx_loc // 128)], shape=rgb_obs.shape)
         best_img_coord = best_img_center.keypoints[0]
         best_img_coord = (best_img_coord.x, best_img_coord.y)
         rotate_to_original = iaa.Sequential([iaa.Affine(rotate=angle)])
         original_center = rotate_to_original(keypoints=best_img_center)
         center = original_center.keypoints[0]    
-        coord = (center.x, center.y)
+        coord = (int(center.x), int(center.y))
         print("Step 5: angle", angle, "coord", coord)
 
 
