@@ -1,5 +1,5 @@
 *.zip
 /data
 /assets
-/venv2_hw4
+/hw4_env
 /__pycache__
