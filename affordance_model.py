@@ -197,11 +197,12 @@ class AffordanceModel(nn.Module):
         coord, angle = None, None 
         # 1. Take RGB input
         image = rgb_obs
-        print("image.shape: ",image.shape)
+        # normalize image
+        image = image.astype(np.float32) / 255.0
 
         # 2. Rotate to [0-7] * 22.5°
         # define augmentation
-        augs = [iaa.Affine(rotate=i*22.5) for i in range(8)] #imgaug counter-clockwise
+        augs = [iaa.Affine(rotate=i*22.5) for i in range(8)] #imgaug
         # apply augmentations to input images
         images_rotated = [aug(image=image) for aug in augs]
         images_tensor = torch.tensor(images_rotated, dtype=torch.float32).to(device)
@@ -222,7 +223,7 @@ class AffordanceModel(nn.Module):
         # find rotation angle and location in original image
         best_img_rotate_angle = 22.5 * idx_rotated
         # OpenCV clockwise convention 
-        angle = -1*best_img_rotate_angle + 360
+        angle = -1*best_img_rotate_angle
         best_img_center = KeypointsOnImage([Keypoint(x=idx_loc % 128, y=idx_loc // 128)], shape=rgb_obs.shape)
         best_img_coord = best_img_center.keypoints[0]
         best_img_coord = (best_img_coord.x, best_img_coord.y)
@@ -230,6 +231,7 @@ class AffordanceModel(nn.Module):
         original_center = rotate_to_original(keypoints=best_img_center)
         center = original_center.keypoints[0]    
         coord = (int(center.x), int(center.y))
+        # coord = (center.x, center.y)
         print("Step 5: angle", angle, "coord", coord)
 
 
