@@ -162,6 +162,7 @@ class ActionRegressionModel(nn.Module):
         output = output.detach().numpy()
         output = output[0]
         print("model output: ", output)
+        coord, angle = recover_action(output, shape=image.shape[:2])
 
         # ===============================================================================
         # visualization
