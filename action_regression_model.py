@@ -70,9 +70,9 @@ def recover_action(
     """
     # TODO: complete this function
     # =============================================================================== 
-    action = action[0]
-    coord = (action[0]*shape[0], action[1]*shape[1])
+    coord = (int(action[0]*128), int(action[1]*128))
     angle = action[2]*180
+    print("recovered action: ", coord, angle)
     # ===============================================================================
     return coord, angle
 
@@ -131,7 +131,8 @@ class ActionRegressionModel(nn.Module):
             draw_grasp(vis_img, coord, angle, color=(255,255,255))
         # pred
         coord, angle = recover_action(output, shape=vis_img.shape[:2])
-        draw_grasp(vis_img, coord, angle, color=(0,255,0))
+        print("visualize img: ", vis_img.shape)
+        draw_grasp(vis_img, coord, angle, color=(0,255,0)) #(chage from (0,255,0))
         return vis_img
 
     def predict_grasp(self, rgb_obs: np.ndarray
@@ -152,15 +153,18 @@ class ActionRegressionModel(nn.Module):
         coord, angle = None, None
 
         image = rgb_obs.astype(np.float32) / 255.0
+        print("original image shape: ", image.shape)
         image_tensor = torch.from_numpy(image).permute(2,0,1).to(device)
         image_tensor = image_tensor.unsqueeze(0)
+        print("image tensor shape: ", image_tensor.shape)
 
         output = self.predict(image_tensor)
         output = output.detach().numpy()
+        output = output[0]
         print("model output: ", output)
 
         # ===============================================================================
         # visualization
-        vis_img = self.visualize(input=image_tensor, output=output)
+        vis_img = self.visualize(input=image.transpose((2,0,1)), output=output)
         return coord, angle, vis_img
 
