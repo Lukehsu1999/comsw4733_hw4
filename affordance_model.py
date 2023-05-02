@@ -212,8 +212,6 @@ class AffordanceModel(nn.Module):
         affordance_map = self.predict(images_tensor)
         affordance_map = torch.clip(affordance_map,0,1)
 
-        
-
 
         # TODO: (problem 3, skip when finishing problem 2) avoid selecting the same failed actions
         # ===============================================================================
@@ -222,6 +220,8 @@ class AffordanceModel(nn.Module):
             bin = max_coord[0]
             past_keypoint = max_coord[1]
             suppression_map = get_gaussian_scoremap(shape=(128,128), keypoint=past_keypoint,sigma=4)
+            # transform suppression_map to tensor that can be deducted from affordance map
+            suppression_map = torch.tensor(suppression_map)
             affordance_map[bin] -= suppression_map
         
         # probably move the get max here
