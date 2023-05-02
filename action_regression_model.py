@@ -38,16 +38,13 @@ class ActionRegressionDataset(Dataset):
         data = self.raw_dataset[idx]
         rgb = data['rgb'].numpy()
         center_point = data['center_point'].numpy()
-        x = center_point[0]
-        y = center_point[1]
-        angle = data['angle'].numpy()
+        angle = data['angle'].item()
 
         # normalize
         rgb = rgb / 255.0
-        x = x / 128.0
-        y = y / 128.0
+        center_point = center_point / 128.0
         angle = angle / 360.0
-        target = np.array([x, y, angle])
+        target = np.array([center_point[0], center_point[1], angle])
 
         # convert to tensor
         rgb = torch.from_numpy(rgb).permute(2,0,1).float()
@@ -116,7 +113,8 @@ class ActionRegressionModel(nn.Module):
         """
         # TODO: complete this method
         # =============================================================================== 
-        return nn.Module()
+        # MSE loss
+        return nn.MSELoss()
         # =============================================================================== 
 
     @staticmethod
@@ -151,6 +149,13 @@ class ActionRegressionModel(nn.Module):
         # Hint: why do we provide the model's device here?
         # ===============================================================================
         coord, angle = None, None
+
+        # image = rgb_obs / 255.0
+        # image_tensor = torch.from_numpy(image).permute(2,0,1).float().unsqueeze(0).to(device)
+
+        # output = self.predict(image_tensor)
+        # print("model output: ", output")
+        # action = recover_action(action=output.cpu().detach().numpy()[0], shape=image.shape[:2]
         # ===============================================================================
         # visualization
         vis_img = self.visualize(input, action)
