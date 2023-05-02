@@ -36,9 +36,29 @@ class ActionRegressionDataset(Dataset):
         """
         # checkout train.RGBDataset for the content of data
         data = self.raw_dataset[idx]
+        rgb = data['rgb'].numpy()
+        center_point = data['center_point'].numpy()
+        x = center_point[0]
+        y = center_point[1]
+        angle = data['angle'].numpy()
+
+        # normalize
+        rgb = rgb / 255.0
+        x = x / 128.0
+        y = y / 128.0
+        angle = angle / 360.0
+        target = np.array([x, y, angle])
+
+        # convert to tensor
+        rgb = torch.from_numpy(rgb).permute(2,0,1).float()
+        target = torch.from_numpy(target).float()
+
         # TODO: complete this method
         # ===============================================================================
-        return dict()
+        return dict(
+            input=rgb,
+            target=target
+        )
         # ===============================================================================
 
 
@@ -54,7 +74,7 @@ def recover_action(
     """
     # TODO: complete this function
     # =============================================================================== 
-    coord, angle = None, None
+    coord, angle = (action[0]*shape[0], action[1]*shape[1]), action[2]*360
     # ===============================================================================
     return coord, angle
 
