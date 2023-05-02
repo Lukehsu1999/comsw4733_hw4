@@ -70,7 +70,9 @@ def recover_action(
     """
     # TODO: complete this function
     # =============================================================================== 
-    coord, angle = (action[0]*shape[0], action[1]*shape[1]), action[2]*360
+    action = action[0]
+    coord = (action[0]*shape[0], action[1]*shape[1])
+    angle = action[2]*180
     # ===============================================================================
     return coord, angle
 
@@ -149,16 +151,16 @@ class ActionRegressionModel(nn.Module):
         # ===============================================================================
         coord, angle = None, None
 
-        image = rgb_obs / 255.0
-        image_tensor = torch.from_numpy(image).permute(2,0,1).float().unsqueeze(0).to(device)
+        image = rgb_obs.astype(np.float32) / 255.0
+        image_tensor = torch.from_numpy(image).permute(2,0,1).to(device)
+        image_tensor = image_tensor.unsqueeze(0)
 
         output = self.predict(image_tensor)
         output = output.detach().numpy()
         print("model output: ", output)
-        #action = recover_action(action=output[0], shape=(128,128))
-        #print("action:", action)
+
         # ===============================================================================
         # visualization
-        vis_img = self.visualize(input=image, target=output)
+        vis_img = self.visualize(input=image_tensor, output=output)
         return coord, angle, vis_img
 
