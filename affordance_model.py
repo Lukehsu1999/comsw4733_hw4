@@ -207,26 +207,36 @@ class AffordanceModel(nn.Module):
         images_rotated = [aug(image=image) for aug in augs]
         images_tensor = torch.tensor(images_rotated, dtype=torch.float32).to(device)
         images_tensor = images_tensor.permute(0,3,1,2)
-        print("after rotate images_tensor: ",images_tensor.shape)
 
         # 3. Feed into network 
         affordance_map = self.predict(images_tensor)
         affordance_map = torch.clip(affordance_map,0,1)
-        print("affordance_map.shape: ",affordance_map.shape) 
 
+        
+
+
+        # TODO: (problem 3, skip when finishing problem 2) avoid selecting the same failed actions
+        # ===============================================================================
+        print("length of past_actions: ", len(self.past_actions))
+        for max_coord in list(self.past_actions):  
+            bin = max_coord[0]
+            past_keypoint = max_coord[1]
+            suppression_map = get_gaussian_scoremap(shape=(128,128), keypoint=past_keypoint,sigma=4)
+            affordance_map[bin] -= suppression_map
+        
+        # probably move the get max here
         # 5. Find the max affordance pixel across all 8 images
         # find index of max pixel value
         max_idx = torch.argmax(affordance_map.view(-1), dim=None).numpy()
         # find index of rotated image and corresponding location
         idx_rotated, idx_loc = divmod(max_idx, affordance_map.shape[2]*affordance_map.shape[3])
-        print("max_idx: ",max_idx, "idx_rotated: ",idx_rotated, "idx_loc: ",idx_loc)
         # find rotation angle and location in original image
         best_img_rotate_angle = 22.5 * idx_rotated
         # OpenCV clockwise convention 
         angle = -1*best_img_rotate_angle
         best_img_center = KeypointsOnImage([Keypoint(x=idx_loc % 128, y=idx_loc // 128)], shape=rgb_obs.shape)
-        best_img_coord = best_img_center.keypoints[0]
-        best_img_coord = (best_img_coord.x, best_img_coord.y)
+        best_img_keypoint = best_img_center.keypoints[0]
+        best_img_coord = np.array([best_img_keypoint.x, best_img_keypoint.y], dtype=np.float32)
         rotate_to_original = iaa.Sequential([iaa.Affine(rotate=angle)])
         original_center = rotate_to_original(keypoints=best_img_center)
         center = original_center.keypoints[0]    
@@ -234,11 +244,13 @@ class AffordanceModel(nn.Module):
         # coord = (center.x, center.y)
         print("Step 5: angle", angle, "coord", coord)
 
+        #
 
-        # TODO: (problem 3, skip when finishing problem 2) avoid selecting the same failed actions
-        # ===============================================================================
-        for max_coord in list(self.past_actions):  
-            bin = max_coord[0] 
+        max_coord = [idx_rotated, best_img_coord]
+        print("saving max_coord: ", max_coord, "to past_actions")
+        self.past_actions.append(max_coord)
+
+
             # supress past actions and select next-best action
         # ===============================================================================
         
