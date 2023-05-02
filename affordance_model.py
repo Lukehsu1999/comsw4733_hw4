@@ -261,6 +261,7 @@ class AffordanceModel(nn.Module):
         # Hint: draw a grey (127,127,127) line on the bottom row of each image.
         # ===============================================================================
         vis_img = None
+        images_to_concat = []
         # Step 1: : iterate through all 8 pairs of (img, pred) and np.concatenate them together. use draw_grasp to visualize grasp pose
         for i in range(8):
             this_img = images_rotated[i]
@@ -285,9 +286,17 @@ class AffordanceModel(nn.Module):
             greyline = np.array(np.ones((1, rgb_obs.shape[0] * 2, 3), dtype=np.uint8) * 127)
             img = np.vstack((img, greyline))
 
-            vis_img = img if vis_img is None else np.concatenate([vis_img, img], axis=0)
+            images_to_concat.append(img)
+
+            #vis_img = img if vis_img is None else np.concatenate([vis_img, img], axis=0)
             
              
         # ===============================================================================
+        # Step 2: concatenate all 8 images to 4 rows and 2 columns
+        two_concat = []
+        for i in range(4):
+            two_concat.append(np.concatenate([images_to_concat[i], images_to_concat[i+4]], axis=1))
+        vis_img = np.concatenate(two_concat, axis=0)
+
         return coord, angle, vis_img
 
