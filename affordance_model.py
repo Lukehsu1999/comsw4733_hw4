@@ -281,9 +281,13 @@ class AffordanceModel(nn.Module):
             row = [in_img, pred_img]
             img = (np.concatenate(row, axis=1)*255).astype(np.uint8)
 
+            #try grey line
+            greyline = np.array(np.ones((1, rgb_obs.shape[0] * 2, 3), dtype=np.uint8) * 127)
+            img = np.vstack((img, greyline))
+
             vis_img = img if vis_img is None else np.concatenate([vis_img, img], axis=0)
-        # Step 2: draw a grey (127,127,127) line on the bottom row of each image.
-        
+            
+             
         # ===============================================================================
         return coord, angle, vis_img
 
